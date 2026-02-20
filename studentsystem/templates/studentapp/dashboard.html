@@ -1,0 +1,204 @@
+{% extends 'studentapp/base.html' %}
+{% block title %}Dashboard – CareerPath{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Sidebar -->
+    <!-- Sidebar -->
+    {% include 'studentapp/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Top Bar -->
+        <header class="dash-header">
+            <div class="dash-greeting">
+                <h1>Welcome back, <span class="gradient-text">{{ request.user.first_name }}</span>! 👋</h1>
+                <p>Here's your personalized career overview</p>
+            </div>
+
+        </header>
+
+        <!-- Stats Row -->
+        <section class="stats-row">
+            <div class="stat-card stat-card--purple">
+                <div class="stat-icon"><i class="fas fa-briefcase"></i></div>
+                <div class="stat-info">
+                    <h3>Career Path</h3>
+                    <p>{{ career_display }}</p>
+                </div>
+            </div>
+            <div class="stat-card stat-card--blue">
+                <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+                <div class="stat-info">
+                    <h3>Primary Goal</h3>
+                    <p>{{ goal_display }}</p>
+                </div>
+            </div>
+            <div class="stat-card stat-card--green">
+                <div class="stat-icon"><i class="fas fa-signal"></i></div>
+                <div class="stat-info">
+                    <h3>Experience</h3>
+                    <p>{{ experience_display }}</p>
+                </div>
+            </div>
+            <div class="stat-card stat-card--orange">
+                <div class="stat-icon"><i class="fas fa-graduation-cap"></i></div>
+                <div class="stat-info">
+                    <h3>Learning Style</h3>
+                    <p>{{ learning_display }}</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Middle Grid -->
+        <section class="dash-grid">
+            <!-- Profile Summary Card -->
+            <div class="dash-card profile-summary-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-user-circle"></i> Your Profile</h2>
+                    <a href="{% url 'onboarding' %}" class="card-action">Edit <i class="fas fa-pen"></i></a>
+                </div>
+                <div class="profile-detail">
+                    <div class="profile-row">
+                        <span class="label"><i class="fas fa-briefcase"></i> Career</span>
+                        <span class="value">{{ career_display }}</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="label"><i class="fas fa-bullseye"></i> Goal</span>
+                        <span class="value">{{ goal_display }}</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="label"><i class="fas fa-signal"></i> Level</span>
+                        <span class="value">{{ experience_display }}</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="label"><i class="fas fa-graduation-cap"></i> Learning</span>
+                        <span class="value">{{ learning_display }}</span>
+                    </div>
+                </div>
+                <div class="interests-section">
+                    <h4><i class="fas fa-heart"></i> Your Interests</h4>
+                    <div class="interest-tags">
+                        {% for interest in interests_list %}
+                        <span class="interest-tag">{{ interest }}</span>
+                        {% empty %}
+                        <span class="interest-tag empty">No interests selected</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="dash-card actions-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+                </div>
+                <div class="actions-list">
+                    <a href="#" class="action-item">
+                        <div class="action-icon action-icon--blue"><i class="fas fa-road"></i></div>
+                        <div class="action-text">
+                            <strong>View My Roadmap</strong>
+                            <small>Personalized learning path</small>
+                        </div>
+                        <i class="fas fa-chevron-right action-arrow"></i>
+                    </a>
+                    <a href="#" class="action-item">
+                        <div class="action-icon action-icon--purple"><i class="fas fa-file-lines"></i></div>
+                        <div class="action-text">
+                            <strong>Upload Resume</strong>
+                            <small>Get AI-powered feedback</small>
+                        </div>
+                        <i class="fas fa-chevron-right action-arrow"></i>
+                    </a>
+                    <a href="#" class="action-item">
+                        <div class="action-icon action-icon--green"><i class="fas fa-briefcase"></i></div>
+                        <div class="action-text">
+                            <strong>Browse Jobs</strong>
+                            <small>Matched to your profile</small>
+                        </div>
+                        <i class="fas fa-chevron-right action-arrow"></i>
+                    </a>
+                    <a href="#" class="action-item">
+                        <div class="action-icon action-icon--orange"><i class="fas fa-code"></i></div>
+                        <div class="action-text">
+                            <strong>Practice Skills</strong>
+                            <small>Coding challenges & projects</small>
+                        </div>
+                        <i class="fas fa-chevron-right action-arrow"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Progress Card -->
+            <div class="dash-card progress-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-line"></i> Your Progress</h2>
+                </div>
+                <div class="progress-items">
+                    <div class="prog-item">
+                        <div class="prog-header"><span>Profile Setup</span><span class="prog-pct">100%</span></div>
+                        <div class="prog-bar">
+                            <div class="prog-fill" style="width:100%;background:var(--color-green)"></div>
+                        </div>
+                    </div>
+                    <div class="prog-item">
+                        <div class="prog-header"><span>Skills Assessment</span><span class="prog-pct">0%</span></div>
+                        <div class="prog-bar">
+                            <div class="prog-fill" style="width:0%;background:var(--color-blue)"></div>
+                        </div>
+                    </div>
+                    <div class="prog-item">
+                        <div class="prog-header"><span>Resume Uploaded</span><span class="prog-pct">0%</span></div>
+                        <div class="prog-bar">
+                            <div class="prog-fill" style="width:0%;background:var(--color-purple)"></div>
+                        </div>
+                    </div>
+                    <div class="prog-item">
+                        <div class="prog-header"><span>Roadmap Started</span><span class="prog-pct">0%</span></div>
+                        <div class="prog-bar">
+                            <div class="prog-fill" style="width:0%;background:var(--color-orange)"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="onboarding-complete-banner">
+                    <i class="fas fa-party-horn"></i>
+                    Profile complete! You're off to a great start.
+                </div>
+            </div>
+
+            <!-- Recommended Resources -->
+            <div class="dash-card resources-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-star"></i> Recommended For You</h2>
+                </div>
+                <div class="resource-list">
+                    <div class="resource-item">
+                        <div class="resource-icon resource-icon--blue"><i class="fas fa-play-circle"></i></div>
+                        <div class="resource-text">
+                            <strong>{{ career_display }} Fundamentals</strong>
+                            <small>Beginner-friendly video series • Free</small>
+                        </div>
+                        <span class="resource-badge">New</span>
+                    </div>
+                    <div class="resource-item">
+                        <div class="resource-icon resource-icon--purple"><i class="fas fa-book"></i></div>
+                        <div class="resource-text">
+                            <strong>{{ goal_display }} Guide</strong>
+                            <small>Step-by-step action plan</small>
+                        </div>
+                        <span class="resource-badge resource-badge--green">Free</span>
+                    </div>
+                    <div class="resource-item">
+                        <div class="resource-icon resource-icon--orange"><i class="fas fa-trophy"></i></div>
+                        <div class="resource-text">
+                            <strong>30-Day {{ career_display }} Challenge</strong>
+                            <small>Build skills with daily tasks</small>
+                        </div>
+                        <span class="resource-badge resource-badge--orange">Popular</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

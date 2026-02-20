@@ -1,0 +1,88 @@
+{% extends 'studentapp/base.html' %}
+{% block title %}Login – CareerPath{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <!-- Animated background blobs -->
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
+
+    <div class="auth-card">
+        <div class="auth-brand">
+            <div class="brand-icon"><i class="fas fa-rocket"></i></div>
+            <h1 class="brand-name">CareerPath</h1>
+            <p class="brand-tagline">Your journey to success starts here</p>
+        </div>
+
+        <div class="auth-header">
+            <h2>Welcome back</h2>
+            <p>Sign in to continue your journey</p>
+        </div>
+
+        <form method="post" class="auth-form" id="loginForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required
+                        autocomplete="username" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required
+                        autocomplete="current-password" />
+                    <button type="button" class="toggle-password" onclick="togglePwd('password', this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="loginBtn">
+                <span>Sign In</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </form>
+
+        <div class="auth-divider"><span>New to CareerPath?</span></div>
+
+        <a href="{% url 'register' %}" class="btn-secondary">
+            <i class="fas fa-user-plus"></i>
+            <span>Create an Account</span>
+        </a>
+
+        <p class="admin-note">
+            <i class="fas fa-shield-halved"></i>
+            <a href="/admin/" target="_blank">Admin Panel</a>
+        </p>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function togglePwd(id, btn) {
+        const input = document.getElementById(id);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function () {
+        const btn = document.getElementById('loginBtn');
+        btn.innerHTML = '<span>Signing in...</span><i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+    });
+</script>
+{% endblock %}
+{% endblock %}

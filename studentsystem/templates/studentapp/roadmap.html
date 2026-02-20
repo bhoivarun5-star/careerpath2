@@ -1,0 +1,329 @@
+{% extends 'studentapp/base.html' %}
+{% block title %}Resume & Roadmap – CareerPath{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Sidebar -->
+    <!-- Sidebar -->
+    {% include 'studentapp/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+
+        {% if state == 'upload' or state == 'error' %}
+        <!-- ===================== UPLOAD SECTION ===================== -->
+        <div class="roadmap-upload-page">
+            <div class="roadmap-hero">
+                <div class="roadmap-hero-icon"><i class="fas fa-route"></i></div>
+                <h1>AI-Powered Career Roadmap</h1>
+                <p>Upload your resume and our AI will analyze your profile, identify skill gaps, match you to job roles,
+                    and generate a personalized learning roadmap with curated resources.</p>
+            </div>
+
+            {% if state == 'error' and error %}
+            <div class="upload-error-banner">
+                <i class="fas fa-triangle-exclamation"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <div class="upload-card">
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+
+                    <div class="file-drop-zone" id="dropZone">
+                        <input type="file" id="resumeInput" name="resume" accept=".pdf,.doc,.docx" required hidden />
+                        <div class="drop-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+                        <h3>Drop your resume here</h3>
+                        <p>or <button type="button" class="browse-btn"
+                                onclick="document.getElementById('resumeInput').click()">Browse files</button></p>
+                        <div class="file-types">
+                            <span><i class="fas fa-file-pdf"></i> PDF</span>
+                            <span><i class="fas fa-file-word"></i> DOCX / DOC</span>
+                            <small>Max 5MB</small>
+                        </div>
+                        <div class="selected-file" id="selectedFile" style="display:none">
+                            <i class="fas fa-file-check"></i>
+                            <span id="fileName">No file selected</span>
+                            <button type="button" onclick="clearFile()" class="clear-file"><i
+                                    class="fas fa-xmark"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="ai-features">
+                        <div class="ai-feat"><i class="fas fa-magnifying-glass-chart"></i><span>Strengths &
+                                Weaknesses</span></div>
+                        <div class="ai-feat"><i class="fas fa-puzzle-piece"></i><span>Missing Skills Detection</span>
+                        </div>
+                        <div class="ai-feat"><i class="fas fa-briefcase"></i><span>Job Role Matching</span></div>
+                        <div class="ai-feat"><i class="fas fa-map-marked-alt"></i><span>Full Learning Roadmap</span>
+                        </div>
+                        <div class="ai-feat"><i class="fas fa-link"></i><span>Curated Resources & Links</span></div>
+                        <div class="ai-feat"><i class="fas fa-brain"></i><span>Powered by Qwen AI</span></div>
+                    </div>
+
+                    <button type="submit" class="btn-analyze" id="analyzeBtn" disabled>
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        <span>Analyze My Resume & Generate Roadmap</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% elif state == 'results' and result %}
+        <!-- ===================== RESULTS SECTION ===================== -->
+        <div class="results-header">
+            <div>
+                <h1>Your Career Analysis</h1>
+                <p class="results-sub">
+                    <i class="fas fa-file-lines"></i> {{ filename }}
+                    &nbsp;·&nbsp;
+                    <i class="fas fa-robot"></i> Analyzed by Qwen AI
+                </p>
+            </div>
+            <a href="{% url 'roadmap' %}" class="btn-reanalyze">
+                <i class="fas fa-arrows-rotate"></i> Re-analyze
+            </a>
+        </div>
+
+        <!-- Score + Summary -->
+        <div class="results-overview">
+            <div class="score-ring-card">
+                <div class="score-ring" data-score="{{ result.score|default:0 }}">
+                    <svg viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="50" class="ring-bg" />
+                        <circle cx="60" cy="60" r="50" class="ring-fill" />
+                    </svg>
+                    <div class="score-label">
+                        <span class="score-num">{{ result.score|default:'–' }}</span>
+                        <span class="score-text">/100</span>
+                    </div>
+                </div>
+                <h3>Resume Score</h3>
+                <p>{{ result.candidate_name|default:request.user.get_full_name }}</p>
+            </div>
+            <div class="summary-card">
+                <h3><i class="fas fa-clipboard-list"></i> AI Summary</h3>
+                <p>{{ result.summary|default:"Analysis complete." }}</p>
+            </div>
+        </div>
+
+        <!-- Strengths & Weaknesses -->
+        <div class="sw-grid">
+            <div class="sw-card sw-card--strengths">
+                <h3><i class="fas fa-circle-check"></i> Strengths</h3>
+                {% for s in result.strengths %}
+                <div class="sw-item">
+                    <div class="sw-icon sw-icon--green"><i class="fas fa-star"></i></div>
+                    <div>
+                        <strong>{{ s.title }}</strong>
+                        <p>{{ s.description }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="empty-msg">No strengths identified.</p>
+                {% endfor %}
+            </div>
+            <div class="sw-card sw-card--weaknesses">
+                <h3><i class="fas fa-circle-exclamation"></i> Weaknesses</h3>
+                {% for w in result.weaknesses %}
+                <div class="sw-item">
+                    <div class="sw-icon sw-icon--red"><i class="fas fa-triangle-exclamation"></i></div>
+                    <div>
+                        <strong>{{ w.title }}</strong>
+                        <p>{{ w.description }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="empty-msg">No weaknesses identified.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Missing Skills -->
+        <div class="section-card">
+            <h3><i class="fas fa-puzzle-piece"></i> Missing Industry-Relevant Skills</h3>
+            <div class="missing-skills-grid">
+                {% for skill in result.missing_skills %}
+                <div class="skill-chip skill-chip--{{ skill.importance|lower }}">
+                    <div class="skill-chip-top">
+                        <span class="skill-name">{{ skill.skill }}</span>
+                        <span class="skill-badge skill-badge--{{ skill.importance|lower }}">{{ skill.importance
+                            }}</span>
+                    </div>
+                    <p class="skill-why">{{ skill.why_needed }}</p>
+                </div>
+                {% empty %}
+                <p class="empty-msg">No critical missing skills detected.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Job Matches -->
+        <div class="section-card">
+            <h3><i class="fas fa-briefcase"></i> Job Role Matches</h3>
+            <div class="job-matches-list">
+                {% for job in result.job_matches %}
+                <div class="job-match-item">
+                    <div class="job-match-info">
+                        <strong>{{ job.role }}</strong>
+                        <small>{{ job.reason }}</small>
+                    </div>
+                    <div class="job-match-bar-wrap">
+                        <div class="job-match-bar">
+                            <div class="job-match-fill" data-width="{{ job.match_percent|default:0 }}%"></div>
+                        </div>
+                        <span class="job-match-pct">{{ job.match_percent|default:0 }}%</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="empty-msg">No job matches found.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Full Roadmap -->
+        <div class="section-card roadmap-section">
+            <h3><i class="fas fa-map-marked-alt"></i> Your Personalized Learning Roadmap</h3>
+            <p class="roadmap-intro">A structured 3–6 month plan with real resources to close your skill gaps and
+                achieve your career goal.</p>
+
+            {% for phase in result.roadmap %}
+            <div class="phase-block">
+                <div class="phase-header">
+                    <div class="phase-num">{{ forloop.counter }}</div>
+                    <div>
+                        <h4>{{ phase.phase }}</h4>
+                        <p>{{ phase.goal }}</p>
+                    </div>
+                </div>
+                <div class="tasks-list">
+                    {% for task in phase.tasks %}
+                    <a href="{{ task.url }}" target="_blank" rel="noopener" class="task-card">
+                        <div class="task-type-icon task-type-icon--{{ task.type|lower }}">
+                            {% if task.type == 'Video' %}<i class="fas fa-play-circle"></i>
+                            {% elif task.type == 'Course' %}<i class="fas fa-graduation-cap"></i>
+                            {% elif task.type == 'Book' %}<i class="fas fa-book"></i>
+                            {% elif task.type == 'Project' %}<i class="fas fa-hammer"></i>
+                            {% else %}<i class="fas fa-newspaper"></i>{% endif %}
+                        </div>
+                        <div class="task-info">
+                            <div class="task-top">
+                                <span class="task-skill">{{ task.skill }}</span>
+                                <span class="task-type-badge">{{ task.type }}</span>
+                            </div>
+                            <strong class="task-title">{{ task.title }}</strong>
+                            <p class="task-why">{{ task.why }}</p>
+                            {% if task.duration %}
+                            <small class="task-duration"><i class="fas fa-clock"></i> {{ task.duration }}</small>
+                            {% endif %}
+                        </div>
+                        <i class="fas fa-arrow-up-right-from-square task-link-icon"></i>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="empty-msg">Roadmap could not be generated.</p>
+            {% endfor %}
+        </div>
+
+        {% elif state == 'analyzing' %}
+        <!-- Should not reach here (POST redirects) but fallback -->
+        <div class="analyzing-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Analyzing your resume…</p>
+        </div>
+        {% endif %}
+
+    </main>
+</div>
+
+{% block extra_js %}
+<script>
+    // File input handling
+    const input = document.getElementById('resumeInput');
+    const dropZone = document.getElementById('dropZone');
+    const selectedFile = document.getElementById('selectedFile');
+    const fileName = document.getElementById('fileName');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    if (input) {
+        input.addEventListener('change', function () {
+            if (this.files.length) {
+                showFile(this.files[0]);
+            }
+        });
+    }
+
+    function showFile(file) {
+        fileName.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+        selectedFile.style.display = 'flex';
+        dropZone.classList.add('has-file');
+        analyzeBtn.disabled = false;
+    }
+
+    function clearFile() {
+        input.value = '';
+        selectedFile.style.display = 'none';
+        dropZone.classList.remove('has-file');
+        analyzeBtn.disabled = true;
+    }
+
+    // Drag & Drop
+    if (dropZone) {
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragging'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragging'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('dragging');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                input.files = e.dataTransfer.files;
+                showFile(file);
+            }
+        });
+    }
+
+    // Loading state on submit
+    const uploadForm = document.getElementById('uploadForm');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', function () {
+            analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Analyzing… This may take 30–60 seconds</span>';
+            analyzeBtn.disabled = true;
+            analyzeBtn.style.opacity = '0.8';
+        });
+    }
+
+    // Animate job match bars on page load
+    // Animate visualizations on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        // Job Match Bars
+        const fills = document.querySelectorAll('.job-match-fill');
+        fills.forEach(f => {
+            const w = f.dataset.width;
+            if (w) {
+                f.style.width = '0';
+                setTimeout(() => { f.style.width = w; }, 200);
+            }
+        });
+
+        // Score Ring Animation
+        const scoreRing = document.querySelector('.score-ring');
+        if (scoreRing) {
+            const score = scoreRing.dataset.score || 0;
+            scoreRing.style.setProperty('--score', score);
+
+            const ringFill = scoreRing.querySelector('.ring-fill');
+            if (ringFill) {
+                // Animate stroke
+                ringFill.style.strokeDasharray = `0, 1000px`;
+                setTimeout(() => {
+                    ringFill.style.strokeDasharray = `${score}px, 1000px`;
+                }, 300);
+            }
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

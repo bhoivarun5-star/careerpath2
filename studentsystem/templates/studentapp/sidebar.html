@@ -1,0 +1,51 @@
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon-sm"><i class="fas fa-rocket"></i></div>
+        <span>CareerPath</span>
+    </div>
+    <nav class="sidebar-nav">
+        <!-- Dashboard -->
+        <a href="{% url 'dashboard' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-house"></i><span>Dashboard</span>
+        </a>
+
+        <!-- Roadmap -->
+        <a href="{% url 'roadmap' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'roadmap' %}active{% endif %}">
+            <i class="fas fa-road"></i><span>Roadmap</span>
+        </a>
+
+        <!-- Resources -->
+        <a href="{% url 'resources' %}"
+            class="nav-item {% if 'resource' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-book-open"></i><span>Resources</span>
+        </a>
+
+        <!-- Progress -->
+        <a href="{% url 'progress' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'progress' %}active{% endif %}">
+            <i class="fas fa-chart-line"></i><span>Progress</span>
+        </a>
+
+
+
+        <!-- Achievements (placeholder) -->
+        <a href="#" class="nav-item">
+            <i class="fas fa-trophy"></i><span>Achievements</span>
+        </a>
+
+        <!-- Community (placeholder) -->
+        <a href="#" class="nav-item">
+            <i class="fas fa-users"></i><span>Community</span>
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="/admin/" class="nav-item" target="_blank">
+            <i class="fas fa-shield-halved"></i><span>Admin Panel</span>
+        </a>
+        <a href="{% url 'logout' %}" class="nav-item nav-logout">
+            <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+        </a>
+    </div>
+</aside>

@@ -1,0 +1,12 @@
+django
+whitenoise
+pypdf2
+pdfplumber
+python-docx
+requests
+openrouter
+google-generativeai
+python-dotenv
+pillow
+django-environ
+gunicorn

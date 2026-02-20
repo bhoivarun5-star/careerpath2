@@ -1,0 +1,128 @@
+{% extends 'studentapp/base.html' %}
+{% block title %}{{ role_name }} Resources – CareerPath{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Sidebar -->
+    <!-- Sidebar -->
+    {% include 'studentapp/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <div class="resource-detail-page">
+            <a href="{% url 'resources' %}" class="btn-back-link"><i class="fas fa-arrow-left"></i> Back to Career
+                Paths</a>
+
+            {% if state == 'error' %}
+            <div class="error-container">
+                <i class="fas fa-triangle-exclamation"></i>
+                <h2>Could not generate resources</h2>
+                <p>{{ error }}</p>
+                <button onclick="window.location.reload()" class="btn-primary">Try Again</button>
+            </div>
+
+            {% elif state == 'success' and result %}
+            <!-- Header -->
+            <div class="role-header">
+                <h1>{{ result.role }}</h1>
+                <p class="role-desc">{{ result.description }}</p>
+
+                <div class="role-actions" style="margin-bottom: 24px;">
+                    <form method="post" action="{% url 'start_roadmap' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" value="{{ result.role }}">
+                        <input type="hidden" name="roadmap_json" value="{{ result_json }}">
+                        <button type="submit" class="btn-primary btn-lg">
+                            <i class="fas fa-rocket"></i> Start Learning Path
+                        </button>
+                    </form>
+                </div>
+
+                <div class="role-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Avg. Salary: <strong>{{ result.avg_salary }}</strong></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-star"></i>
+                        <span>Key Skills:</span>
+                        <div class="meta-tags">
+                            {% for s in result.key_skills %}
+                            <span class="meta-tag">{{ s }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roadmap -->
+            <div class="roadmap-section">
+                <h3><i class="fas fa-map-signs"></i> Structured Learning Path</h3>
+
+                <div class="timeline-container">
+                    <div class="timeline-line"></div>
+
+                    <!-- Start Marker -->
+                    <div class="timeline-start">
+                        <div class="start-dot"></div>
+                        <span>Start Journey</span>
+                    </div>
+
+                    {% for phase in result.roadmap %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker">{{ forloop.counter }}</div>
+                        <div class="phase-block">
+                            <div class="phase-header">
+                                <div>
+                                    <h4 class="phase-title">{{ phase.level }}</h4>
+                                    <p class="phase-focus">{{ phase.focus }}</p>
+                                    <div class="phase-topics">Topics: {{ phase.topics|join:", " }}</div>
+                                </div>
+                            </div>
+
+                            <div class="tasks-list">
+                                {% for res in phase.resources %}
+                                <a href="{{ res.url }}" target="_blank" rel="noopener" class="task-card">
+                                    <div class="task-type-icon task-type-icon--{{ res.type|lower }}">
+                                        {% if res.type == 'Video' %}<i class="fas fa-play-circle"></i>
+                                        {% elif res.type == 'Course' %}<i class="fas fa-graduation-cap"></i>
+                                        {% elif res.type == 'Book' %}<i class="fas fa-book"></i>
+                                        {% elif res.type == 'Article' %}<i class="fas fa-newspaper"></i>
+                                        {% else %}<i class="fas fa-link"></i>{% endif %}
+                                    </div>
+                                    <div class="task-info">
+                                        <div class="task-top">
+                                            <span class="task-type-badge">{{ res.type }}</span>
+                                            <span class="task-author">{{ res.author }}</span>
+                                        </div>
+                                        <strong class="task-title">{{ res.title }}</strong>
+                                    </div>
+                                    <i class="fas fa-arrow-up-right-from-square task-link-icon"></i>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- End Marker -->
+                    <div class="timeline-end">
+                        <div class="end-icon"><i class="fas fa-flag-checkered"></i></div>
+                        <span>Role Mastery</span>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- Loading State (managed by server delay or JS if async, but here initial render) -->
+            <!-- Since we are doing sync load, this block might effectively act as the 'loading' view if we stream? 
+           Django standard rendering waits for context. So user sees browser spinner.
+           To make it better, we could have used HTMX. 
+           But since we're here, let's just ensure if state is 'loading' (which we passed in view but then overrode if success)
+           Actually my view logic waits for result. So this else block won't shine unless view fails/returns early.
+      -->
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

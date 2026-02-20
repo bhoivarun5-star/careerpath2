@@ -1,0 +1,264 @@
+{% extends 'studentapp/base.html' %}
+{% block title %}My Progress – CareerPath{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Sidebar -->
+    <!-- Sidebar -->
+    {% include 'studentapp/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <div class="dash-header">
+            <div class="dash-greeting">
+                <h1>My Learning <span class="gradient-text">Progress</span></h1>
+                <p>Track your journey and master new skills one step at a time.</p>
+            </div>
+        </div>
+
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="progress-container fade-in">
+
+            <!-- Quiz Recommendations Section -->
+            <div class="quiz-recommendations mb-4">
+                <div class="section-header">
+                    <h2><i class="fas fa-brain"></i> Recommended Assessments</h2>
+                    <p>Master your skills with AI-generated 50-question exams.</p>
+                </div>
+
+                <div class="quiz-grid">
+                    {% for topic in quiz_topics %}
+                    <div class="quiz-card-mini">
+                        <div class="qc-content">
+                            <h3>{{ topic }}</h3>
+                            <span class="badge badge-purple">50 Questions</span>
+                        </div>
+                        <form method="POST" action="{% url 'take_quiz' %}" onsubmit="startQuizLoader(this)">
+                            {% csrf_token %}
+                            <input type="hidden" name="topic" value="{{ topic }}">
+                            <button type="submit" class="btn-primary btn-sm">
+                                start <i class="fas fa-play"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state-mini">
+                        <p>Start a roadmap to unlock quizzes!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% for roadmap in roadmaps %}
+            <div class="roadmap-card" id="roadmap-{{ roadmap.id }}">
+                <div class="roadmap-header">
+                    <div class="roadmap-info">
+                        <h2>{{ roadmap.role }}</h2>
+                        <span class="status-badge status-{{ roadmap.status }}">{{ roadmap.status|title }}</span>
+                    </div>
+                    <div class="roadmap-progress-wrapper">
+                        <div class="progress-text">
+                            <span>Progress</span>
+                            <span id="progress-text-{{ roadmap.id }}">{{ roadmap.get_progress }}%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="progress-bar-{{ roadmap.id }}"
+                                data-progress="{{ roadmap.get_progress }}"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="phases-accordion">
+                    {% for phase in roadmap.phases.all %}
+                    <div class="phase-item">
+                        <div class="phase-trigger" onclick="togglePhase(this)">
+                            <h4>{{ phase.title }}</h4>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="phase-content">
+                            <p class="phase-desc">{{ phase.description }}</p>
+                            <ul class="task-list">
+                                {% for task in phase.tasks.all %}
+                                <li class="task-item {% if task.is_completed %}completed{% endif %}"
+                                    id="task-li-{{ task.id }}">
+                                    <div class="task-check">
+                                        <input type="checkbox" id="task-{{ task.id }}" {{
+                                            task.is_completed|yesno:"checked," }} data-task-id="{{ task.id }}"
+                                            data-roadmap-id="{{ roadmap.id }}" onchange="toggleTask(this)">
+                                        <label for="task-{{ task.id }}"></label>
+                                    </div>
+                                    <div class="task-details">
+                                        <span class="task-title">{{ task.title }}</span>
+                                        <a href="{{ task.resource_url }}" target="_blank" class="task-link">
+                                            <i class="fas fa-external-link-alt"></i> {{ task.resource_type }}
+                                        </a>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <img src="https://cdni.iconscout.com/illustration/premium/thumb/start-startup-2537388-2146483.png"
+                    alt="Start Journey" style="max-width: 200px; opacity: 0.8;">
+                <h3>No Active Journeys</h3>
+                <p>Explore resources and start a learning path to see it here.</p>
+                <a href="{% url 'resources' %}" class="btn-primary">Explore Resources</a>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+
+<script>
+    const csrfToken = "{{ csrf_token }}";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.progress-bar-fill').forEach(bar => {
+            const progress = bar.dataset.progress;
+            bar.style.width = progress + '%';
+        });
+    });
+
+    function togglePhase(element) {
+        element.parentElement.classList.toggle('active');
+    }
+
+    function toggleTask(checkbox) {
+        const taskId = checkbox.dataset.taskId;
+        const roadmapId = checkbox.dataset.roadmapId;
+
+        fetch(`/toggle-task/${taskId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI
+                    const taskLi = document.getElementById(`task-li-${taskId}`);
+                    if (data.completed) {
+                        taskLi.classList.add('completed');
+                    } else {
+                        taskLi.classList.remove('completed');
+                    }
+
+                    // Update Progress Bar
+                    const progressBar = document.getElementById(`progress-bar-${roadmapId}`);
+                    const progressText = document.getElementById(`progress-text-${roadmapId}`);
+                    if (progressBar) progressBar.style.width = data.progress + '%';
+                    if (progressText) progressText.innerText = data.progress + '%';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function startQuizLoader(form) {
+        const btn = form.querySelector('button');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+        document.getElementById('quiz-loading').style.display = 'flex';
+    }
+</script>
+
+<style>
+    /* Quiz Recommendations */
+    .quiz-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .quiz-card-mini {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .quiz-card-mini:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        border-color: var(--color-primary);
+    }
+
+    .qc-content h3 {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+    }
+
+    .badge-purple {
+        background: rgba(139, 92, 246, 0.15);
+        color: var(--color-primary);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .empty-state-mini {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 30px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 12px;
+        color: var(--color-text-muted);
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(17, 24, 39, 0.95);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        backdrop-filter: blur(5px);
+    }
+
+    .loader-content {
+        text-align: center;
+        animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .loader-content h3 {
+        margin-top: 24px;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .loader-content p {
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 8px;
+        font-size: 1.1rem;
+    }
+
+    .fa-3x {
+        font-size: 3em;
+        color: var(--color-primary);
+    }
+</style>
+{% endblock %}

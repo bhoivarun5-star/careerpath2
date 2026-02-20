@@ -1,0 +1,287 @@
+{% extends 'studentapp/base.html' %}
+{% block title %}Set Up Your Profile – CareerPath{% endblock %}
+
+{% block content %}
+<div class="onboarding-page">
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
+
+    <div class="onboarding-container">
+        <div class="onboarding-header">
+            <div class="brand-icon"><i class="fas fa-rocket"></i></div>
+            <h1>Tell us about yourself</h1>
+            <p>Answer 5 quick questions so we can personalize your experience</p>
+            <div class="progress-steps">
+                <div class="step active" data-step="1">1</div>
+                <div class="step-line"></div>
+                <div class="step" data-step="2">2</div>
+                <div class="step-line"></div>
+                <div class="step" data-step="3">3</div>
+                <div class="step-line"></div>
+                <div class="step" data-step="4">4</div>
+                <div class="step-line"></div>
+                <div class="step" data-step="5">5</div>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressFill" style="width:20%"></div>
+            </div>
+            <p class="progress-label" id="progressLabel">Question 1 of 5</p>
+        </div>
+
+        <form method="post" id="onboardingForm">
+            {% csrf_token %}
+
+            <!-- Q1: Career Path -->
+            <div class="question-card active" id="q1">
+                <div class="question-number">Question 1</div>
+                <h2 class="question-title"><i class="fas fa-briefcase"></i> What's your career path?</h2>
+                <p class="question-sub">Select the role that best describes your professional direction</p>
+                <div class="options-grid">
+                    {% for value, label in career_choices %}
+                    <label class="option-card">
+                        <input type="radio" name="career_path" value="{{ value }}" required />
+                        <div class="option-content">
+                            <div class="option-icon">
+                                {% if value == 'software_engineer' %}<i class="fas fa-code"></i>
+                                {% elif value == 'data_scientist' %}<i class="fas fa-chart-bar"></i>
+                                {% elif value == 'web_developer' %}<i class="fas fa-globe"></i>
+                                {% elif value == 'product_manager' %}<i class="fas fa-tasks"></i>
+                                {% elif value == 'designer' %}<i class="fas fa-palette"></i>
+                                {% elif value == 'devops' %}<i class="fas fa-cloud"></i>
+                                {% elif value == 'cybersecurity' %}<i class="fas fa-shield-alt"></i>
+                                {% elif value == 'ai_ml' %}<i class="fas fa-brain"></i>
+                                {% elif value == 'entrepreneur' %}<i class="fas fa-lightbulb"></i>
+                                {% else %}<i class="fas fa-star"></i>{% endif %}
+                            </div>
+                            <span>{{ label }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn-next" onclick="goToStep(2)">Next <i
+                        class="fas fa-arrow-right"></i></button>
+            </div>
+
+            <!-- Q2: Primary Goal -->
+            <div class="question-card" id="q2">
+                <div class="question-number">Question 2</div>
+                <h2 class="question-title"><i class="fas fa-bullseye"></i> What's your primary goal?</h2>
+                <p class="question-sub">What do you want to achieve with CareerPath?</p>
+                <div class="options-grid options-grid--2col">
+                    {% for value, label in goal_choices %}
+                    <label class="option-card">
+                        <input type="radio" name="primary_goal" value="{{ value }}" required />
+                        <div class="option-content">
+                            <div class="option-icon">
+                                {% if value == 'get_job' %}<i class="fas fa-handshake"></i>
+                                {% elif value == 'switch_career' %}<i class="fas fa-shuffle"></i>
+                                {% elif value == 'freelance' %}<i class="fas fa-laptop-code"></i>
+                                {% elif value == 'startup' %}<i class="fas fa-fire"></i>
+                                {% elif value == 'upskill' %}<i class="fas fa-chart-line"></i>
+                                {% else %}<i class="fas fa-graduation-cap"></i>{% endif %}
+                            </div>
+                            <span>{{ label }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn-back" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i>
+                        Back</button>
+                    <button type="button" class="btn-next" onclick="goToStep(3)">Next <i
+                            class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Q3: Interests (multi-select) -->
+            <div class="question-card" id="q3">
+                <div class="question-number">Question 3</div>
+                <h2 class="question-title"><i class="fas fa-heart"></i> What are your interests?</h2>
+                <p class="question-sub">Select all that apply – the more you pick, the better we tailor your journey!
+                </p>
+                <div class="options-grid options-multi">
+                    {% for value, label in interest_choices %}
+                    <label class="option-card option-checkbox">
+                        <input type="checkbox" name="interests" value="{{ value }}" />
+                        <div class="option-content">
+                            <div class="option-icon">
+                                {% if value == 'coding' %}<i class="fas fa-code"></i>
+                                {% elif value == 'design' %}<i class="fas fa-pen-nib"></i>
+                                {% elif value == 'data' %}<i class="fas fa-database"></i>
+                                {% elif value == 'gaming' %}<i class="fas fa-gamepad"></i>
+                                {% elif value == 'finance' %}<i class="fas fa-coins"></i>
+                                {% elif value == 'health' %}<i class="fas fa-heartbeat"></i>
+                                {% elif value == 'education' %}<i class="fas fa-book-open"></i>
+                                {% elif value == 'social_media' %}<i class="fas fa-share-nodes"></i>
+                                {% elif value == 'robotics' %}<i class="fas fa-robot"></i>
+                                {% else %}<i class="fas fa-link"></i>{% endif %}
+                            </div>
+                            <span>{{ label }}</span>
+                            <div class="check-circle"><i class="fas fa-check"></i></div>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn-back" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i>
+                        Back</button>
+                    <button type="button" class="btn-next" onclick="goToStep(4)">Next <i
+                            class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Q4: Experience Level -->
+            <div class="question-card" id="q4">
+                <div class="question-number">Question 4</div>
+                <h2 class="question-title"><i class="fas fa-signal"></i> What's your experience level?</h2>
+                <p class="question-sub">Be honest – we'll personalize content for your level</p>
+                <div class="options-grid options-grid--2col">
+                    {% for value, label in experience_choices %}
+                    <label class="option-card">
+                        <input type="radio" name="experience_level" value="{{ value }}" required />
+                        <div class="option-content">
+                            <div class="option-icon">
+                                {% if value == 'beginner' %}<i class="fas fa-seedling"></i>
+                                {% elif value == 'intermediate' %}<i class="fas fa-layer-group"></i>
+                                {% elif value == 'experienced' %}<i class="fas fa-star"></i>
+                                {% else %}<i class="fas fa-crown"></i>{% endif %}
+                            </div>
+                            <span>{{ label }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn-back" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i>
+                        Back</button>
+                    <button type="button" class="btn-next" onclick="goToStep(5)">Next <i
+                            class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Q5: Learning Style -->
+            <div class="question-card" id="q5">
+                <div class="question-number">Question 5</div>
+                <h2 class="question-title"><i class="fas fa-graduation-cap"></i> How do you prefer to learn?</h2>
+                <p class="question-sub">We'll curate resources in your preferred format</p>
+                <div class="options-grid options-grid--2col">
+                    {% for value, label in learning_choices %}
+                    <label class="option-card">
+                        <input type="radio" name="learning_style" value="{{ value }}" required />
+                        <div class="option-content">
+                            <div class="option-icon">
+                                {% if value == 'videos' %}<i class="fas fa-play-circle"></i>
+                                {% elif value == 'books' %}<i class="fas fa-book"></i>
+                                {% elif value == 'projects' %}<i class="fas fa-hammer"></i>
+                                {% elif value == 'courses' %}<i class="fas fa-chalkboard-teacher"></i>
+                                {% else %}<i class="fas fa-users"></i>{% endif %}
+                            </div>
+                            <span>{{ label }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn-back" onclick="goToStep(4)"><i class="fas fa-arrow-left"></i>
+                        Back</button>
+                    <button type="submit" class="btn-primary" id="submitBtn">
+                        <span>Complete Profile</span>
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    let currentStep = 1;
+
+    function goToStep(step) {
+        const oldCard = document.getElementById('q' + currentStep);
+        const newCard = document.getElementById('q' + step);
+
+        // Validate current step before going forward
+        if (step > currentStep) {
+            if (!validateStep(currentStep)) return;
+        }
+
+        // Animate out
+        oldCard.style.transform = step > currentStep ? 'translateX(-60px)' : 'translateX(60px)';
+        oldCard.style.opacity = '0';
+        setTimeout(() => {
+            oldCard.classList.remove('active');
+            newCard.classList.add('active');
+            newCard.style.transform = step > currentStep ? 'translateX(60px)' : 'translateX(-60px)';
+            newCard.style.opacity = '0';
+            requestAnimationFrame(() => {
+                newCard.style.transform = 'translateX(0)';
+                newCard.style.opacity = '1';
+            });
+        }, 200);
+
+        // Update progress
+        currentStep = step;
+        document.getElementById('progressFill').style.width = (step * 20) + '%';
+        document.getElementById('progressLabel').textContent = 'Question ' + step + ' of 5';
+
+        // Update step indicators
+        document.querySelectorAll('.step').forEach((el, i) => {
+            el.classList.toggle('active', i + 1 <= step);
+            el.classList.toggle('done', i + 1 < step);
+        });
+    }
+
+    function validateStep(step) {
+        if (step === 1) {
+            const sel = document.querySelector('input[name="career_path"]:checked');
+            if (!sel) { showStepError('Please select your career path!'); return false; }
+        } else if (step === 2) {
+            const sel = document.querySelector('input[name="primary_goal"]:checked');
+            if (!sel) { showStepError('Please select your primary goal!'); return false; }
+        } else if (step === 3) {
+            const sels = document.querySelectorAll('input[name="interests"]:checked');
+            if (sels.length === 0) { showStepError('Please select at least one interest!'); return false; }
+        } else if (step === 4) {
+            const sel = document.querySelector('input[name="experience_level"]:checked');
+            if (!sel) { showStepError('Please select your experience level!'); return false; }
+        }
+        return true;
+    }
+
+    function showStepError(msg) {
+        const existing = document.querySelector('.step-error');
+        if (existing) existing.remove();
+        const err = document.createElement('div');
+        err.className = 'step-error';
+        err.innerHTML = '<i class="fas fa-triangle-exclamation"></i> ' + msg;
+        document.getElementById('q' + currentStep).querySelector('.btn-row, .btn-next').insertAdjacentElement('beforebegin', err);
+        setTimeout(() => err.remove(), 3000);
+    }
+
+    // Animate option cards on radio/checkbox change
+    document.querySelectorAll('.option-card input').forEach(input => {
+        input.addEventListener('change', function () {
+            if (this.type === 'radio') {
+                const siblings = document.querySelectorAll('input[name="' + this.name + '"]');
+                siblings.forEach(s => s.closest('.option-card').classList.remove('selected'));
+            }
+            this.closest('.option-card').classList.toggle('selected', this.checked);
+        });
+    });
+
+    document.getElementById('onboardingForm').addEventListener('submit', function () {
+        const btn = document.getElementById('submitBtn');
+        btn.innerHTML = '<span>Saving...</span><i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+    });
+
+    // Add transitions to question cards
+    document.querySelectorAll('.question-card').forEach(card => {
+        card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    });
+</script>
+{% endblock %}
+{% endblock %}

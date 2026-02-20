@@ -1,0 +1,1 @@
+{"error":{"message":"qwen/qwen3-embedding-4b is an embedding model and cannot be used with the chat/completions endpoint. Use the /embeddings endpoint instead.","code":400},"user_id":"user_358y2VpusnRF6LnM5xFXmcN254a"}

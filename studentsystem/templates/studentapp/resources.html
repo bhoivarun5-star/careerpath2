@@ -1,0 +1,32 @@
+{% extends 'studentapp/base.html' %}
+{% block title %}Learning Resources – CareerPath{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Sidebar (Same as dashboard) -->
+    <!-- Sidebar -->
+    {% include 'studentapp/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <div class="dash-header">
+            <div class="dash-greeting">
+                <h1>Explore <span class="gradient-text">Career Paths</span></h1>
+                <p>Select a career to generate a personalized learning curriculum and resources.</p>
+            </div>
+        </div>
+
+        <div class="resources-grid">
+            {% for career in careers %}
+            <a href="{% url 'resource_detail' career.slug %}" class="career-card">
+                <div class="career-icon">
+                    <i class="fas {{ career.icon }}"></i>
+                </div>
+                <h3>{{ career.name }}</h3>
+                <p>Generate curriculum & resources <i class="fas fa-arrow-right"></i></p>
+            </a>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+{% endblock %}
